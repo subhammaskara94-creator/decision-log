@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 type DecisionCardProps = {
-  id: number;
+  id: string;
   title: string;
   date: string;
   confidence: number;

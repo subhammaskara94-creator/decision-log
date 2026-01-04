@@ -33,24 +33,30 @@ export default function Home() {
 
   // Auth lifecycle
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
+  supabase.auth.getUser().then(({ data }) => {
+    setUser(data.user);
+  });
 
-    const { data } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    const nextUser = session?.user ?? null;
+    setUser(nextUser);
 
-    return () => {
-      data.subscription.unsubscribe();
-    };
-  }, []);
+    if (!nextUser) {
+      // User signed out → clear user-scoped state
+      setDecisions([]);
+    }
+  });
+
+  return () => subscription.unsubscribe();
+}, []);
+
 
   // Load decisions from localStorage (on mount)
 useEffect(() => {
 if (!user) return;
+
 
 fetchDecisions(user.id).then((data) => {
     setDecisions(
